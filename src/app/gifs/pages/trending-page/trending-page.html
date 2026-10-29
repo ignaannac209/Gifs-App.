@@ -1,0 +1,28 @@
+@if (gifService.trendingGifsError(); as error) {
+  <div class="my-4 rounded-md bg-red-50 p-4 text-red-700" role="alert">
+    <p>{{ error }}</p>
+    <button class="mt-2 underline" (click)="gifService.loadTrendingGifs()">Intentar de nuevo</button>
+  </div>
+}
+
+<div class="h-screen overflow-y-scroll grid grid-cols-2 md:grid-cols-4 gap-4 pt-5"
+(scroll)="onScroll()"
+#groupDiv
+>
+  @for (group of gifService.trendingGifGroup(); track $index) {
+    <div class="grid gap-4">
+      @for (gif of group; track gif.id) {
+        <div>
+          <img
+            class="h-auto w-full rounded-lg object-cover"
+            [src]="gif.url"
+            [alt]="gif.title"
+          />
+        </div>
+      }
+    </div>
+    @if (gifService.trendingGifsLoading()) {
+      <p class="py-4 text-center" role="status">Cargando GIFs...</p>
+    }
+  }
+</div>
