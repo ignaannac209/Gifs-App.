@@ -1,21 +1,29 @@
-<h2 class="text-2xl font-bold mt-5">Buscar Gifs</h2>
-<h3 class="text-sm text-gray-500">Buscar gifs por nombre, descripción o tags</h3>
+<div class="flex h-screen flex-col">
+  <h2 class="text-2xl font-bold mt-5">Buscar Gifs</h2>
+  <h3 class="text-sm text-gray-500">Buscar gifs por nombre, descripción o tags</h3>
 
-<section class="flex flex-col gap-4">
-  <input
-    type="text"
-    placeholder="Buscar Gifs"
-    class="mt-3 w-full border border-gray-300 bg-white rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-    (keyup.enter)="onSearch(txtSearch.value)"
-    #txtSearch
-  >
-</section>
+  <section class="flex flex-col gap-4">
+    <input
+      type="text"
+      placeholder="Buscar Gifs"
+      class="mt-3 w-full border border-gray-300 bg-white rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      (keyup.enter)="onSearch(txtSearch.value)"
+      #txtSearch
+    >
+  </section>
 
-@if (searchError(); as error) {
-  <p class="mt-4 rounded-md bg-red-50 p-4 text-red-700" role="alert">{{ error }}</p>
-}
+  @if (searchError(); as error) {
+    <div class="mt-4 rounded-md bg-red-50 p-4 text-red-700" role="alert">
+      <p>{{ error }}</p>
+      <button class="mt-2 underline" (click)="retryLoading()">Intentar de nuevo</button>
+    </div>
+  }
 
-<section class="py-5">
-  <gif-list [gifs]="gifs()"/>
+  <section class="min-h-0 flex-1 overflow-y-auto py-5" (scroll)="onScroll($event)">
+    <gif-list [gifs]="gifs()"/>
 
-</section>
+    @if (isLoading()) {
+      <p class="py-4 text-center" role="status">Cargando GIFs...</p>
+    }
+  </section>
+</div>

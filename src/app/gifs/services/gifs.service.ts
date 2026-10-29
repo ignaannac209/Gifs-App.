@@ -9,6 +9,12 @@ import { map, Observable, tap } from 'rxjs';
 
 
 const GIF_KEY = 'gifs';
+export const GIF_SEARCH_PAGE_SIZE = 20;
+
+interface SearchGifsPage {
+  gifs: Gif[];
+  totalCount: number;
+}
 
 const isGif = (value: unknown): value is Gif => {
   if (!value || typeof value !== 'object') return false;
@@ -104,25 +110,30 @@ export class GifService {
             });
     }
 
-    searchGifs(query: string):Observable<Gif[]> {
+    searchGifs(query: string, offset = 0): Observable<SearchGifsPage> {
       const normalizedQuery = query.trim().toLowerCase();
 
       return this.http
             .get<GiphyResponse>(`${environment.giphyUrl}/gifs/search`, {
                 params: {
                     api_key: environment.giphyApiKey,
-                    limit: 20,
+                    limit: GIF_SEARCH_PAGE_SIZE,
+                    offset,
                     q: query.trim(),
                 },
             }).pipe(
-              map(({data}) => data ),
-             map((items) => GifMapper.mapGiphyItemsToGifArray(items)),
-             tap( items => {
-              this.searchHistory.update( history => ({
-                ...history,
-                [normalizedQuery]: items
-              }))
-             })
+              map(({data, pagination}) => ({
+                gifs: GifMapper.mapGiphyItemsToGifArray(data),
+                totalCount: pagination.total_count,
+              })),
+              tap(({gifs}) => {
+                this.searchHistory.update(history => ({
+                  ...history,
+                  [normalizedQuery]: offset === 0
+                    ? gifs
+                    : [...(history[normalizedQuery] ?? []), ...gifs]
+                }));
+              })
             );
     }
 
